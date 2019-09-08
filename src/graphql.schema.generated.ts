@@ -5,19 +5,34 @@
  */
 
 /* tslint:disable */
-export class Author {
-    id: number;
-    firstName?: string;
-    lastName?: string;
-    posts?: Post[];
+export class LoginInput {
+    email: string;
+    password: string;
 }
 
-export class Post {
-    id: number;
-    title: string;
-    votes?: number;
+export class SignUpInput {
+    email: string;
+    password: string;
+}
+
+export class AuthPayload {
+    id: string;
+    email: string;
+}
+
+export abstract class IMutation {
+    abstract signup(signUpInput?: SignUpInput): AuthPayload | Promise<AuthPayload>;
+
+    abstract login(loginInput?: LoginInput): AuthPayload | Promise<AuthPayload>;
 }
 
 export abstract class IQuery {
-    abstract author(id: number): Author | Promise<Author>;
+    abstract user(): User | Promise<User>;
+}
+
+export class User {
+    id: string;
+    email: string;
+    createdAt: string;
+    updatedAt: string;
 }

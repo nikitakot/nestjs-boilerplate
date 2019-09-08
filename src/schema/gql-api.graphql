@@ -1,16 +1,30 @@
-type Author {
-    id: Int!
-    firstName: String
-    lastName: String
-    posts: [Post]
+type User {
+  id: ID!
+  email: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
-type Post {
-    id: Int!
-    title: String!
-    votes: Int
+input SignUpInput {
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type AuthPayload {
+  id: ID!
+  email: String!
 }
 
 type Query {
-    author(id: Int!): Author
+  user: User!
+}
+
+type Mutation {
+  signup(signUpInput: SignUpInput): AuthPayload!
+  login(loginInput: LoginInput): AuthPayload!
 }

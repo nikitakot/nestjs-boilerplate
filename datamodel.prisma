@@ -1,4 +1,0 @@
-type User {
-  id: ID! @id
-  name: String!
-}
