@@ -101,12 +101,23 @@ export interface ClientConstructor<T> {
  * Types
  */
 
-export type UserOrderByInput = "id_ASC" | "id_DESC" | "name_ASC" | "name_DESC";
+export type UserOrderByInput =
+  | "id_ASC"
+  | "id_DESC"
+  | "email_ASC"
+  | "email_DESC"
+  | "password_ASC"
+  | "password_DESC"
+  | "createdAt_ASC"
+  | "createdAt_DESC"
+  | "updatedAt_ASC"
+  | "updatedAt_DESC";
 
 export type MutationType = "CREATED" | "UPDATED" | "DELETED";
 
 export type UserWhereUniqueInput = AtLeastOne<{
   id: Maybe<ID_Input>;
+  email?: Maybe<String>;
 }>;
 
 export interface UserWhereInput {
@@ -124,20 +135,50 @@ export interface UserWhereInput {
   id_not_starts_with?: Maybe<ID_Input>;
   id_ends_with?: Maybe<ID_Input>;
   id_not_ends_with?: Maybe<ID_Input>;
-  name?: Maybe<String>;
-  name_not?: Maybe<String>;
-  name_in?: Maybe<String[] | String>;
-  name_not_in?: Maybe<String[] | String>;
-  name_lt?: Maybe<String>;
-  name_lte?: Maybe<String>;
-  name_gt?: Maybe<String>;
-  name_gte?: Maybe<String>;
-  name_contains?: Maybe<String>;
-  name_not_contains?: Maybe<String>;
-  name_starts_with?: Maybe<String>;
-  name_not_starts_with?: Maybe<String>;
-  name_ends_with?: Maybe<String>;
-  name_not_ends_with?: Maybe<String>;
+  email?: Maybe<String>;
+  email_not?: Maybe<String>;
+  email_in?: Maybe<String[] | String>;
+  email_not_in?: Maybe<String[] | String>;
+  email_lt?: Maybe<String>;
+  email_lte?: Maybe<String>;
+  email_gt?: Maybe<String>;
+  email_gte?: Maybe<String>;
+  email_contains?: Maybe<String>;
+  email_not_contains?: Maybe<String>;
+  email_starts_with?: Maybe<String>;
+  email_not_starts_with?: Maybe<String>;
+  email_ends_with?: Maybe<String>;
+  email_not_ends_with?: Maybe<String>;
+  password?: Maybe<String>;
+  password_not?: Maybe<String>;
+  password_in?: Maybe<String[] | String>;
+  password_not_in?: Maybe<String[] | String>;
+  password_lt?: Maybe<String>;
+  password_lte?: Maybe<String>;
+  password_gt?: Maybe<String>;
+  password_gte?: Maybe<String>;
+  password_contains?: Maybe<String>;
+  password_not_contains?: Maybe<String>;
+  password_starts_with?: Maybe<String>;
+  password_not_starts_with?: Maybe<String>;
+  password_ends_with?: Maybe<String>;
+  password_not_ends_with?: Maybe<String>;
+  createdAt?: Maybe<DateTimeInput>;
+  createdAt_not?: Maybe<DateTimeInput>;
+  createdAt_in?: Maybe<DateTimeInput[] | DateTimeInput>;
+  createdAt_not_in?: Maybe<DateTimeInput[] | DateTimeInput>;
+  createdAt_lt?: Maybe<DateTimeInput>;
+  createdAt_lte?: Maybe<DateTimeInput>;
+  createdAt_gt?: Maybe<DateTimeInput>;
+  createdAt_gte?: Maybe<DateTimeInput>;
+  updatedAt?: Maybe<DateTimeInput>;
+  updatedAt_not?: Maybe<DateTimeInput>;
+  updatedAt_in?: Maybe<DateTimeInput[] | DateTimeInput>;
+  updatedAt_not_in?: Maybe<DateTimeInput[] | DateTimeInput>;
+  updatedAt_lt?: Maybe<DateTimeInput>;
+  updatedAt_lte?: Maybe<DateTimeInput>;
+  updatedAt_gt?: Maybe<DateTimeInput>;
+  updatedAt_gte?: Maybe<DateTimeInput>;
   AND?: Maybe<UserWhereInput[] | UserWhereInput>;
   OR?: Maybe<UserWhereInput[] | UserWhereInput>;
   NOT?: Maybe<UserWhereInput[] | UserWhereInput>;
@@ -145,15 +186,18 @@ export interface UserWhereInput {
 
 export interface UserCreateInput {
   id?: Maybe<ID_Input>;
-  name: String;
+  email: String;
+  password: String;
 }
 
 export interface UserUpdateInput {
-  name?: Maybe<String>;
+  email?: Maybe<String>;
+  password?: Maybe<String>;
 }
 
 export interface UserUpdateManyMutationInput {
-  name?: Maybe<String>;
+  email?: Maybe<String>;
+  password?: Maybe<String>;
 }
 
 export interface UserSubscriptionWhereInput {
@@ -173,26 +217,38 @@ export interface NodeNode {
 
 export interface User {
   id: ID_Output;
-  name: String;
+  email: String;
+  password: String;
+  createdAt: DateTimeOutput;
+  updatedAt: DateTimeOutput;
 }
 
 export interface UserPromise extends Promise<User>, Fragmentable {
   id: () => Promise<ID_Output>;
-  name: () => Promise<String>;
+  email: () => Promise<String>;
+  password: () => Promise<String>;
+  createdAt: () => Promise<DateTimeOutput>;
+  updatedAt: () => Promise<DateTimeOutput>;
 }
 
 export interface UserSubscription
   extends Promise<AsyncIterator<User>>,
     Fragmentable {
   id: () => Promise<AsyncIterator<ID_Output>>;
-  name: () => Promise<AsyncIterator<String>>;
+  email: () => Promise<AsyncIterator<String>>;
+  password: () => Promise<AsyncIterator<String>>;
+  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
 }
 
 export interface UserNullablePromise
   extends Promise<User | null>,
     Fragmentable {
   id: () => Promise<ID_Output>;
-  name: () => Promise<String>;
+  email: () => Promise<String>;
+  password: () => Promise<String>;
+  createdAt: () => Promise<DateTimeOutput>;
+  updatedAt: () => Promise<DateTimeOutput>;
 }
 
 export interface UserConnection {
@@ -315,21 +371,30 @@ export interface UserSubscriptionPayloadSubscription
 
 export interface UserPreviousValues {
   id: ID_Output;
-  name: String;
+  email: String;
+  password: String;
+  createdAt: DateTimeOutput;
+  updatedAt: DateTimeOutput;
 }
 
 export interface UserPreviousValuesPromise
   extends Promise<UserPreviousValues>,
     Fragmentable {
   id: () => Promise<ID_Output>;
-  name: () => Promise<String>;
+  email: () => Promise<String>;
+  password: () => Promise<String>;
+  createdAt: () => Promise<DateTimeOutput>;
+  updatedAt: () => Promise<DateTimeOutput>;
 }
 
 export interface UserPreviousValuesSubscription
   extends Promise<AsyncIterator<UserPreviousValues>>,
     Fragmentable {
   id: () => Promise<AsyncIterator<ID_Output>>;
-  name: () => Promise<AsyncIterator<String>>;
+  email: () => Promise<AsyncIterator<String>>;
+  password: () => Promise<AsyncIterator<String>>;
+  createdAt: () => Promise<AsyncIterator<DateTimeOutput>>;
+  updatedAt: () => Promise<AsyncIterator<DateTimeOutput>>;
 }
 
 /*
@@ -342,6 +407,16 @@ export type ID_Output = string;
 The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
 */
 export type String = string;
+
+/*
+DateTime scalar input type, allowing Date
+*/
+export type DateTimeInput = Date | string;
+
+/*
+DateTime scalar output type, which is always a string
+*/
+export type DateTimeOutput = string;
 
 /*
 The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.
