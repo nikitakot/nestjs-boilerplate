@@ -2,4 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma-client';
 
 @Injectable()
-export class PrismaService extends Prisma {}
+export class PrismaService {
+  client: Prisma;
+
+  constructor() {
+    this.client = new Prisma();
+  }
+}
