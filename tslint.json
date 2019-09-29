@@ -14,5 +14,11 @@
     "arrow-parens": false,
     "object-literal-sort-keys": false
   },
-  "rulesDirectory": []
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": [
+      "src/graphql.schema.generated.ts",
+      "generated/**/*"
+    ]
+  }
 }

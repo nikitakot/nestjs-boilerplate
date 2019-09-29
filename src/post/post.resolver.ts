@@ -7,7 +7,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { PrismaService } from '../prisma/prisma.service';
-import { Post, PostInput } from '../graphql.schema.generated';
+import { Post } from '../graphql.schema.generated';
 import { GqlUser } from '../shared/decorators/decorators';
 import { User } from '../../generated/prisma-client';
 import { UseGuards } from '@nestjs/common';
