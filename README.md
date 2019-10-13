@@ -11,6 +11,7 @@ Boilerplate application from this [tutorial](https://dev.to/nikitakot/nestjs-boi
 ```bash
 $ npm install
 $ docker-compose up -d
+$ prisma deploy
 ```
 
 ## Running the app
