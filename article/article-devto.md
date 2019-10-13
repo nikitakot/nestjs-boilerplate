@@ -2,20 +2,20 @@
 title: Building NestJS app boilerplate - Authentication, Validation, GraphQL and Prisma
 published: false
 description: 
-tags: #nodejs
+tags: #node, #javascript, #graphql, #webdev
 ---
 
 # Intro
 
-NestJS is a relatively new framework in node world. Inspired by Angular and build on top of Express with full TypeScript support, it brings scalable and maintainable architecture to your applications. NestJS also supports GraphQL - robust query language for APIs with dedicated, ready to use `@nestjs/graphql` module (in fact, the module is just a wrapper around Apollo server).
+[NestJS](https://nestjs.com/) is a relatively new framework in node world. Inspired by Angular and build on top of Express with full TypeScript support, it brings scalable and maintainable architecture to your applications. NestJS also supports [GraphQL](https://graphql.org/) - robust query language for APIs with dedicated, ready to use `@nestjs/graphql` module (in fact, the module is just a wrapper around Apollo server).
 
-In this tutorial we're going to build a boilerplate with all basic features you need to develop more complex apps. As a database layer we will use Prisma, since it works extremely well with GraphQL APIs.
+In this tutorial we're going to build a boilerplate with all basic features you need to develop more complex apps. As a database layer we will use [Prisma](https://www.prisma.io/), since it works extremely well with GraphQL APIs.
 
 # Getting Started
 
 ### NestJS
 
-To start playing with NestJS you should have node (version >= 8.9.0) and npm installed. You can download and install it from official web or, for example, use nvm to manage different node versions on your machine as I do.
+To start playing with NestJS you should have node (version >= 8.9.0) and npm installed. You can download and install it from [official web](https://nodejs.org/) or, for example, use [nvm](https://github.com/nvm-sh/nvm) to manage different node versions on your machine as I do.
 
 After you have node and npm installed, let's install NestJS CLI and initialise project with it.
 
@@ -26,7 +26,7 @@ $ nest new nestjs-boilerplate
 
 During the installation process you will be asked what package manager you want to use (yarn or npm). In this tutorial I'll be using npm, but if you prefer yarn, go for it.
 
-Now let's run `npm start`. It will start the application on port 3000, so opening `http://localhost:3000` in browser will display "Hello World!" message.
+Now let's run `npm start`. It will start the application on port 3000, so opening `http://localhost:3000` in a browser will display "Hello World!" message.
 
 ### GraphQL
 
@@ -42,7 +42,7 @@ After packages are installed, let's create configuration file for our GraphQL se
 $ touch src/graphql.options.ts
 ```
 
-The configuration will be passed to underlying Appolo instance by NestJS. Configuration documentation can be found [here](https://www.apollographql.com/docs/apollo-server/api/apollo-server/).
+The configuration will be passed to the underlying Appolo instance by NestJS. Configuration documentation can be found [here](https://www.apollographql.com/docs/apollo-server/api/apollo-server/).
 
 **src/graphql.options.ts**
 ```typescript
@@ -73,7 +73,7 @@ export class GraphqlOptions implements GqlOptionsFactory {
 }
 ```
 
-Then register `GraphQLModule` and pass configuration in application's main `AppModule` module.
+Then register `GraphQLModule` and pass the configuration in application's main `AppModule` module.
 
 **src/app.module.ts**
 ```typescript
@@ -93,7 +93,7 @@ import { GraphqlOptions } from './graphql.options';
 export class AppModule {}
 ```
 
-You may notice I removed `AppController` and `AppService` from main module. We don't need them since we will be using GraphQL instead of REST. Appropriate files can be deleted too.
+You may notice I removed `AppController` and `AppService` from the main module. We don't need them since we will be using GraphQL instead of REST. Appropriate files can be deleted too.
 
 To test this setup out, let's create a simple graphql API schema.
 
@@ -121,15 +121,15 @@ type Query {
 }
 ```
 
-Running `npm start` will generate `src/graphql.schema.generated.ts` with typescript types from schema, that we can use in our source code, and launch the server on port 3000. We can now navigate to `http://localhost:3000/graphql` (default GraphQL API path) to see GraphQL Playground.
+Running `npm start` will generate `src/graphql.schema.generated.ts` with typescript types from the schema, that we can use in our source code, and launch the server on port 3000. We can now navigate to `http://localhost:3000/graphql` (default GraphQL API path) to see GraphQL Playground.
 
 <img src="https://thepracticaldev.s3.amazonaws.com/i/gccnoc11iw8fv6gvnld2.png" alt="graphql playground" width="542"/>
 
 ### Prisma
 
-To run Prisma we need to install [Docker](https://www.docker.com/), follow the installation guide [here](https://docs.docker.com/install/). *Linux users - you need to install [docker-compose](https://docs.docker.com/compose/install/) separately*.  We will be running two containers - one for actual database and second one for prisma service.
+To run Prisma we need to install [Docker](https://www.docker.com/), follow the installation guide [here](https://docs.docker.com/install/). *Linux users - you need to install [docker-compose](https://docs.docker.com/compose/install/) separately*. We will be running two containers - one for actual database and second one for the prisma service.
 
-Create a docker compose configuration file in root project directory.
+Create a docker compose configuration file in the root project directory.
 
 ```shell
 $ touch docker-compose.yml
@@ -173,7 +173,7 @@ Run docker compose in the root directory of the project. Docker compose will dow
 $ docker-compose up -d
 ```
 
-Prisma server is now connected to local Postgress instance and runs on port 4466. Opening `http://localhost:4466` in a browser will open Prisma GraphQL playground.
+Prisma server is now connected to the local Postgress instance and runs on port 4466. Opening `http://localhost:4466` in a browser will open Prisma GraphQL playground.
 
 Now let's install Prisma CLI and prisma client helper library. 
 
@@ -201,7 +201,7 @@ generate:
     output: ./generated/prisma-client/
 ```
 
-Then run `prisma deploy` to deploy your service. It will initialise schema specified in `datamodel.prisma` and generate prisma client.
+Then run `prisma deploy` to deploy your service. It will initialise the schema specified in `datamodel.prisma` and generate prisma client.
 
 ```shell
 $ prisma deploy
@@ -213,7 +213,7 @@ Go to `http://localhost:4466/_admin` to open prisma admin tool, a little more co
 
 This step is pretty much optional because you can use generated prisma client as it is in other modules/services etc. But making a prisma module will make it easier to configure or change something in the future.
 
-With NestJS CLI lets create prisma module and service. CLI will automatically create files boilerplate and do initial module metadata setup for us.
+With NestJS CLI lets create prisma module and a service. CLI will automatically create files boilerplate and do initial module metadata setup for us.
 
 ```shell
 $ nest g module prisma 
@@ -298,8 +298,7 @@ generate:
     output: ./generated/prisma-client/
 ```
 
-After deploying the schema prisma client will be automatically updated and
-you should see appropriate changes in prisma admin `http://localhost:4466/_admin`.
+After deploying the schema prisma client will be automatically updated and you should see appropriate changes in prisma admin `http://localhost:4466/_admin`.
 
 ```ssh
 $ prisma deploy
@@ -403,8 +402,7 @@ export class AuthService {
 }
 ```
 
-Validate method of auth service will check if user id
-from JWT token is persistent in database. 
+Validate method of the auth service will check if a user id from a JWT token is persistent in the database. 
 
 **src/auth/jwt.strategy.ts**
 
@@ -438,9 +436,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 }
 ```
 
-Here we define where our token should be taken from and how to validate it. 
-We will be passing JWT secret via environment variable so you will be launching
-the app with `JWT_SECRET=your_secret_here npm run start`.
+Here we define where our token should be taken from and how to validate it. We will be passing the JWT secret via environment variable so you will be launching the app with `JWT_SECRET=your_secret_here npm run start`.
 
 To be able to parse cookies we need to define global `cookie-parser` middleware.
 
@@ -459,8 +455,7 @@ async function bootstrap() {
 bootstrap();
 ```
 
-Now let's create validation class that we will use later
-and put some email/password validations there.
+Now let's create a validation class that we will use later and put some email/password validations there.
 
 ```shell
 $ touch src/auth/sign-up-input.dto.ts
@@ -479,8 +474,7 @@ export class SignUpInputDto extends SignUpInput {
 }
 ```
 
-To make validation work, we need to globally define
-validation pipe from `@nestjs/common` package.
+To make validation work, we need to globally define the validation pipe from `@nestjs/common` package.
 
 **src/app.module.ts**
 
@@ -514,8 +508,7 @@ import { UserModule } from './user/user.module';
 export class AppModule {}
 ```
 
-To easily access request object and user object from graphql context we can 
-create decorators.
+To easily access request and user objects from graphql context we can create decorators.
 
 **src/shared/decorators/decorators.ts**
 
@@ -601,7 +594,7 @@ and secure out passwords and `httpOnly` cookie to prevent XSS attacks on
 the client side.
 
 If we want to make some endpoints accessible only for signed-up users we need
-to create a authentication guard and then use it as an decorator above endpoint
+to create an authentication guard and then use it as a decorator above an endpoint
 definition.
 
 **src/auth/graphql-auth.guard.ts**
@@ -649,8 +642,7 @@ import { JwtStrategy } from './jwt.strategy';
 export class AuthModule {}
 ```
 
-Cool, authentication is ready! Start the server and try to create a user, log-in
-and check cookies in the browser.
+Cool, authentication is ready! Start the server and try to create a user, log-in and check cookies in a browser. 
 If you see `token` cookie everything works as expected.
 
 ### Post module
@@ -664,8 +656,7 @@ $ nest g resolver post
 $ touch src/post/post-input.dto.ts
 ```
 
-First let's define resolvers for all `Post` fields and add simple validation for
-`createPost` mutation.
+First let's define resolvers for all `Post` fields and add a simple validation for `createPost` mutation.
 
 **src/post/post-input.dto.ts**
 
@@ -752,8 +743,7 @@ export class PostModule {}
 
 ### User Module
 
-Although we don't have any user mutations, we still need to define user resolvers
-so graphql can resolve our queries correctly.
+Although we don't have any user mutations, we still need to define user resolvers so graphql can resolve our queries correctly.
 
 ```shell
 $ nest g module user 
@@ -797,11 +787,9 @@ export class UserModule {}
 
 # Conclusion
 
-We are finally done with our app boilerplate! Check nestjs documentation to add 
-more useful features to your application. When deploying to production environment don't
-forger to secure your Prisma and databse.
+We are finally done with our app boilerplate! Check nestjs documentation to add more useful features to your application. When deploying to production environment don't forger to secure your Prisma layer and database.
 
-You can find the final code here.
+You can find the final code [here]().
 
 
 
