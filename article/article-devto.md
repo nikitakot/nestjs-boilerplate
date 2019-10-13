@@ -228,7 +228,13 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma-client';
 
 @Injectable()
-export class PrismaService extends Prisma {}
+export class PrismaService {
+  client: Prisma;
+
+  constructor() {
+    this.client = new Prisma();
+  }
+}
 ```
 
 And export it in **src/prisma/prisma.module.ts**.
@@ -246,18 +252,16 @@ export class PrismaModule {}
 
 Great! We are done with the initial setup, let's now continue implementing authentication.
 
-# Authentication
+# Shemas
 
 ### Database schema
 
-Let's create a new folder where we will store all our database schema files and create a file where we will define user entity.
+Let's store our boilerplate app schema in **database/datamodel.prisma**.
 
 ```shell
 $ mkdir database
-$ touch database/user.prisma
+$ touch database/datamodel.prisma
 ```
-
-And put the following schema there:
 
 **database/user.prisma**
 
@@ -266,29 +270,36 @@ type User {
     id: ID! @id
     email: String! @unique
     password: String!
+    post: [Post!]!
+    createdAt: DateTime! @createdAt
+    updatedAt: DateTime! @updatedAt
+}
+
+type Post {
+    id: ID! @id
+    title: String!
+    body: String
+    author: User!
     createdAt: DateTime! @createdAt
     updatedAt: DateTime! @updatedAt
 }
 ```
 
-Then let's modify **prisma.yml** and define path to our new schema. You may notice I've also added *post-deploy* hook to the file, it's optional and will just simply generate prisma client for us after the deploy so you don't need to do it manually.
+Then let's modify **prisma.yml** and define path to our new schema.
 
 **prisma.yml**
 
 ```yml
 endpoint: http://localhost:4466
 datamodel:
-  - database/user.prisma
+  - database/datamodel.prisma
 generate:
   - generator: typescript-client
     output: ./generated/prisma-client/
-hooks:
-  post-deploy:
-    - prisma generate
 ```
 
-
-After deploying the schema you should see appropriate changes in prisma admin `http://localhost:4466/_admin`.
+After deploying the schema prisma client will be automatically updated and
+you should see appropriate changes in prisma admin `http://localhost:4466/_admin`.
 
 ```ssh
 $ prisma deploy
@@ -301,6 +312,21 @@ Let's put the following graphql API schema in **src/schema/gql-api.graphql**.
 **src/schema/gql-api.graphql**
 
 ```graphql
+type User {
+  id: ID!
+  email: String!
+  post: [Post!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Post {
+  id: ID!
+  title: String!
+  body: String
+  author: User!
+}
+
 input SignUpInput {
   email: String!
   password: String!
@@ -311,14 +337,25 @@ input LoginInput {
   password: String!
 }
 
-type Mutation {
-  signup(signUpInput: SignUpInput): AuthPayload!
-  login(loginInput: LoginInput): AuthPayload!
+input PostInput {
+  title: String!
+  body: String
 }
 
 type AuthPayload {
   id: ID!
   email: String!
+}
+
+type Query {
+  post(id: ID!): Post!
+  posts: [Post!]!
+}
+
+type Mutation {
+  signup(signUpInput: SignUpInput): AuthPayload!
+  login(loginInput: LoginInput): AuthPayload!
+  createPost(postInput: PostInput): Post!
 }
 ```
 
@@ -329,7 +366,7 @@ Now launch the app with `npm start` so it will generate typescript types from th
 First, we need to install some additional packages to implement passport JWT in our NestJS app.
 
 ```shell
-$ npm install --save @nestjs/passport passport @nestjs/jwt passport-jwt
+$ npm install --save @nestjs/passport passport @nestjs/jwt passport-jwt cookie-parser bcryptjs class-validator
 $ npm install @types/passport-jwt --save-dev
 ```
 
@@ -343,6 +380,208 @@ $ touch src/auth/jwt.strategy.ts
 $ touch src/auth/graphql-auth.guard.ts 
 ```
 
+**src/auth/auth.service.ts**
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { User } from '../../generated/prisma-client';
+
+@Injectable()
+export class AuthService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async validate({ id }): Promise<User> {
+    const user = await this.prisma.client.user({ id });
+    if (!user) {
+      throw Error('Authenticate validation error');
+    }
+    return user;
+  }
+}
+```
+
+Validate method of auth service will check if user id
+from JWT token is persistent in database. 
+
+**src/auth/jwt.strategy.ts**
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { Strategy } from 'passport-jwt';
+import { Request } from 'express';
+import { AuthService } from './auth.service';
+
+const cookieExtractor = (req: Request): string | null => {
+  let token = null;
+  if (req && req.cookies) {
+    token = req.cookies.token;
+  }
+  return token;
+};
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(private readonly authService: AuthService) {
+    super({
+      jwtFromRequest: cookieExtractor,
+      secretOrKey: process.env.JWT_SECRET,
+    });
+  }
+
+  validate(payload) {
+    return this.authService.validate(payload);
+  }
+}
+```
+
+Here we define where our token should be taken from and how to validate it. 
+We will be passing JWT secret via environment variable so you will be launching
+the app with `JWT_SECRET=your_secret_here npm run start`.
+
+Now let's create validation class that we will use later
+and put some email/password validations there.
+
+```shell
+$ touch src/auth/sign-up-input.dto.ts
+```
+
+```typescript
+import { IsEmail, MinLength } from 'class-validator';
+import { SignUpInput } from '../graphql.schema.generated';
+
+export class SignUpInputDto extends SignUpInput {
+  @IsEmail()
+  readonly email: string;
+
+  @MinLength(6)
+  readonly password: string;
+}
+```
+
+To easily access request object and user object from graphql context we can 
+create decorators.
+
+**src/auth/auth.resolver.ts**
+
+```typescript
+import * as bcryptjs from 'bcryptjs';
+import { Response } from 'express';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { LoginInput } from '../graphql.schema.generated';
+import { ResGql } from '../shared/decorators/decorators';
+import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from '../prisma/prisma.service';
+import { SignUpInputDto } from './sign-up-input.dto';
+
+@Resolver('Auth')
+export class AuthResolver {
+  constructor(
+    private readonly jwt: JwtService,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  @Mutation()
+  async login(
+    @Args('loginInput') { email, password }: LoginInput,
+    @ResGql() res: Response,
+  ) {
+    const user = await this.prisma.client.user({ email });
+    if (!user) {
+      throw Error('Email or password incorrect');
+    }
+
+    const valid = await bcryptjs.compare(password, user.password);
+    if (!valid) {
+      throw Error('Email or password incorrect');
+    }
+
+    const jwt = this.jwt.sign({ id: user.id });
+    res.cookie('token', jwt, { httpOnly: true });
+
+    return user;
+  }
+
+  @Mutation()
+  async signup(
+    @Args('signUpInput') signUpInputDto: SignUpInputDto,
+    @ResGql() res: Response,
+  ) {
+    const emailExists = await this.prisma.client.$exists.user({
+      email: signUpInputDto.email,
+    });
+    if (emailExists) {
+      throw Error('Email is already in use');
+    }
+    const password = await bcryptjs.hash(signUpInputDto.password, 10);
+
+    const user = await this.prisma.client.createUser({ ...signUpInputDto, password });
+
+    const jwt = this.jwt.sign({ id: user.id });
+    res.cookie('token', jwt, { httpOnly: true });
+
+    return user;
+  }
+}
+```
+
+And finally the authentication logic. We are using `bcryptjs` to hash
+and secure out passwords and `httpOnly` cookie to prevent XSS attacks on
+the client side.
+
+If we want to make some endpoints accessible only for signed-up users we need
+to create a authentication guard and then use it as an annotation above endpoint
+definition.
+
+**src/auth/graphql-auth.guard.ts**
+
+```typescript
+import { ExecutionContext, Injectable } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { GqlExecutionContext } from '@nestjs/graphql';
+
+@Injectable()
+export class GqlAuthGuard extends AuthGuard('jwt') {
+  getRequest(context: ExecutionContext) {
+    const ctx = GqlExecutionContext.create(context);
+    return ctx.getContext().req;
+  }
+}
+```
+
+Now let's wire up everything in `AuthModule`.
+
+```typescript
+import { Module } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { AuthResolver } from './auth.resolver';
+import { PrismaModule } from '../prisma/prisma.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './jwt.strategy';
+
+@Module({
+  imports: [
+    PrismaModule,
+    PassportModule.register({
+      defaultStrategy: 'jwt',
+    }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: {
+        expiresIn: 3600, // 1 hour
+      },
+    }),
+  ],
+  providers: [AuthService, AuthResolver, JwtStrategy],
+})
+export class AuthModule {}
+```
+
+Cool, authentication is ready! Start the server and try to create a user, log-in
+and check cookies in the browser.
+If you see `token` cookie everything works as expected.
 
 
 
