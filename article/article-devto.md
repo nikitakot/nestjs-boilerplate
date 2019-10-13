@@ -440,6 +440,23 @@ Here we define where our token should be taken from and how to validate it.
 We will be passing JWT secret via environment variable so you will be launching
 the app with `JWT_SECRET=your_secret_here npm run start`.
 
+To be able to parse cookies we need to define global `cookie-parser` middleware.
+
+**src/main.ts**
+
+```typescript
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import * as cookieParser from 'cookie-parser';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
+  await app.listen(3000);
+}
+bootstrap();
+```
+
 Now let's create validation class that we will use later
 and put some email/password validations there.
 
@@ -460,8 +477,59 @@ export class SignUpInputDto extends SignUpInput {
 }
 ```
 
+To make validation work, we need to globally define
+validation pipe from `@nestjs/common` package.
+
+**src/app.module.ts**
+
+```typescript
+import { Module, ValidationPipe } from '@nestjs/common';
+import { GraphQLModule } from '@nestjs/graphql';
+import { GraphqlOptions } from './graphql.options';
+import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
+import { APP_PIPE } from '@nestjs/core';
+import { PostModule } from './post/post.module';
+import { UserModule } from './user/user.module';
+
+@Module({
+  imports: [
+    GraphQLModule.forRootAsync({
+      useClass: GraphqlOptions,
+    }),
+    PrismaModule,
+    AuthModule,
+    PostModule,
+    UserModule,
+  ],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
+  ],
+})
+export class AppModule {}
+```
+
 To easily access request object and user object from graphql context we can 
 create decorators.
+
+**src/shared/decorators/decorators.ts**
+
+```typescript
+import { createParamDecorator } from '@nestjs/common';
+import { Response } from 'express';
+import { User } from '../../../generated/prisma-client';
+
+export const ResGql = createParamDecorator(
+  (data, [root, args, ctx, info]): Response => ctx.res,
+);
+
+export const GqlUser = createParamDecorator(
+  (data, [root, args, ctx, info]): User => ctx.req && ctx.req.user,
+);
+```
 
 **src/auth/auth.resolver.ts**
 
@@ -531,7 +599,7 @@ and secure out passwords and `httpOnly` cookie to prevent XSS attacks on
 the client side.
 
 If we want to make some endpoints accessible only for signed-up users we need
-to create a authentication guard and then use it as an annotation above endpoint
+to create a authentication guard and then use it as an decorator above endpoint
 definition.
 
 **src/auth/graphql-auth.guard.ts**
@@ -583,31 +651,132 @@ Cool, authentication is ready! Start the server and try to create a user, log-in
 and check cookies in the browser.
 If you see `token` cookie everything works as expected.
 
+### Post module
 
+Let's add some basic logic to our app. Authorized users will be able
+to create posts that will be readable to everyone. 
 
+```shell
+$ nest g module post
+$ nest g resolver post
+$ touch src/post/post-input.dto.ts
+```
 
+First let's define resolvers for all `Post` fields and add simple validation for
+`createPost` mutation.
 
+**src/post/post-input.dto.ts**
 
+```typescript
+import { IsString, MaxLength, MinLength } from 'class-validator';
+import { PostInput } from '../graphql.schema.generated';
 
+export class PostInputDto extends PostInput {
+  @IsString()
+  @MinLength(10)
+  @MaxLength(60)
+  readonly title: string;
+}
+```
 
+**src/post/post.resolver.ts**
 
+```typescript
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveProperty,
+  Resolver,
+} from '@nestjs/graphql';
+import { PrismaService } from '../prisma/prisma.service';
+import { Post } from '../graphql.schema.generated';
+import { GqlUser } from '../shared/decorators/decorators';
+import { User } from '../../generated/prisma-client';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from '../auth/graphql-auth.guard';
+import { PostInputDto } from './post-input.dto';
 
+@Resolver('Post')
+export class PostResolver {
+  constructor(private readonly prisma: PrismaService) {}
 
+  @Query()
+  async post(@Args('id') id: string) {
+    return this.prisma.client.post({ id });
+  }
 
+  @Query()
+  async posts() {
+    return this.prisma.client.posts();
+  }
 
+  @ResolveProperty()
+  async author(@Parent() { id }: Post) {
+    return this.prisma.client.post({ id }).author();
+  }
 
+  @Mutation()
+  @UseGuards(GqlAuthGuard)
+  async createPost(
+    @Args('postInput') { title, body }: PostInputDto,
+    @GqlUser() user: User,
+  ) {
+    return this.prisma.client.createPost({
+      title,
+      body,
+      author: { connect: { id: user.id } },
+    });
+  }
+}
+```
+
+And don't forget to define everything in the module.
+
+**src/post/post.module.ts**
+
+```typescript
+import { Module } from '@nestjs/common';
+import { PostResolver } from './post.resolver';
+import { PrismaModule } from '../prisma/prisma.module';
+
+@Module({
+  providers: [PostResolver],
+  imports: [PrismaModule],
+})
+export class PostModule {}
+```
 
 ### User Module
 
-Create user module, user service and user resolver with NestJS CLI:
+Although we don't have any user mutations, we still need to define user resolvers
+so graphql can resolve our queries correctly.
 
 ```shell
 $ nest g module user 
-$ nest g service user
 $ nest g resolver user
 ```
 
-Import `PrismaModule` to `UserModule`.
+**src/user/user.resolver.ts**
+
+```typescript
+import { Parent, ResolveProperty, Resolver } from '@nestjs/graphql';
+import { PrismaService } from '../prisma/prisma.service';
+import { User } from '../graphql.schema.generated';
+
+@Resolver('User')
+export class UserResolver {
+  constructor(private readonly prisma: PrismaService) {}
+
+  @ResolveProperty()
+  async post(@Parent() { id }: User) {
+    return this.prisma.client.user({ id }).post();
+  }
+}
+```
+
+And of course `UserModule`.
 
 **src/user/user.module.ts**
 
