@@ -1,9 +1,12 @@
 ---
 title: Building NestJS app boilerplate - Authentication, Validation, GraphQL and Prisma
 published: false
+cover_image: https://thepracticaldev.s3.amazonaws.com/i/whtmfhi1tmpsq1vgblhc.jpg
 description: 
 tags: #node, #javascript, #graphql, #webdev
 ---
+
+The boilerplate app created by this tutorial is [here](https://github.com/nikitakot/nestjs-boilerplate).
 
 # Intro
 
@@ -789,12 +792,4 @@ export class UserModule {}
 
 We are finally done with our app boilerplate! Check nestjs documentation to add more useful features to your application. When deploying to production environment don't forger to secure your Prisma layer and database.
 
-You can find the final code [here]().
-
-
-
-
-
-
-
-
+You can find the final code [here](https://github.com/nikitakot/nestjs-boilerplate).
