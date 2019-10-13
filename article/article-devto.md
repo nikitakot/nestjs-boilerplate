@@ -361,6 +361,8 @@ type Mutation {
 
 Now launch the app with `npm start` so it will generate typescript types from the schema above.
 
+# Modules
+
 ### Auth Module
 
 First, we need to install some additional packages to implement passport JWT in our NestJS app.
@@ -793,6 +795,13 @@ import { PrismaModule } from '../prisma/prisma.module';
 export class UserModule {}
 ```
 
+# Conclusion
+
+We are finally done with our app boilerplate! Check nestjs documentation to add 
+more useful features to your application. When deploying to production environment don't
+forger to secure your Prisma and databse.
+
+You can find the final code here.
 
 
 
