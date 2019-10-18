@@ -10,17 +10,19 @@ The boilerplate app created by this tutorial is [here](https://github.com/nikita
 
 # Intro
 
-[NestJS](https://nestjs.com/) is a relatively new framework in node world. Inspired by Angular and build on top of Express with full TypeScript support, it brings scalable and maintainable architecture to your applications. NestJS also supports [GraphQL](https://graphql.org/) - robust query language for APIs with dedicated, ready to use `@nestjs/graphql` module (in fact, the module is just a wrapper around Apollo server).
+[NestJS](https://nestjs.com/) is a relatively new framework in the Node world. Inspired by Angular and built on top of Express with full TypeScript support, it provides scalable and maintainable architecture to your applications. NestJS also supports [GraphQL](https://graphql.org/) - a robust query language for APIs with a dedicated, ready to use, `@nestjs/graphql` module (in fact, the module is just a wrapper around Apollo server).
 
-In this tutorial we're going to build a boilerplate with all basic features you need to develop more complex apps. As a database layer we will use [Prisma](https://www.prisma.io/), since it works extremely well with GraphQL APIs.
+In this tutorial we're going to build a boilerplate with all the basic features you will need to develop more complex applications. We will use [Prisma](https://www.prisma.io/) as a database layer since it works extremely well with GraphQL APIs, allowing you to map Prisma resolver to GraphQl API resolvers easily.
+
+By the end of this article we will create simple blog application, which will allow users to register, log-in and create posts.
 
 # Getting Started
 
 ### NestJS
 
-To start playing with NestJS you should have node (version >= 8.9.0) and npm installed. You can download and install it from [official web](https://nodejs.org/) or, for example, use [nvm](https://github.com/nvm-sh/nvm) to manage different node versions on your machine as I do.
+To start playing with NestJS you should have node (version >= 8.9.0) and npm installed. You can download and install Node from the [official website](https://nodejs.org/).
 
-After you have node and npm installed, let's install NestJS CLI and initialise project with it.
+After you have node and npm installed, let's install NestJS CLI and initialise a new project.
 
 ```shell
 $ npm i -g @nestjs/cli
@@ -29,7 +31,7 @@ $ nest new nestjs-boilerplate
 
 During the installation process you will be asked what package manager you want to use (yarn or npm). In this tutorial I'll be using npm, but if you prefer yarn, go for it.
 
-Now let's run `npm start`. It will start the application on port 3000, so opening `http://localhost:3000` in a browser will display "Hello World!" message.
+Now let's run `npm start`. It will start the application on port 3000, so opening `http://localhost:3000` in a browser will display a "Hello World!" message.
 
 ### GraphQL
 
@@ -39,13 +41,13 @@ As mentioned above, we will use `@nestjs/graphql` module to setup GraphQL for ou
 $ npm i --save @nestjs/graphql apollo-server-express graphql-tools graphql
 ```
 
-After packages are installed, let's create configuration file for our GraphQL server.
+After the packages are installed, let's create a configuration file for our GraphQL server.
 
 ```shell
 $ touch src/graphql.options.ts
 ```
 
-The configuration will be passed to the underlying Appolo instance by NestJS. Configuration documentation can be found [here](https://www.apollographql.com/docs/apollo-server/api/apollo-server/).
+The configuration will be passed to the underlying Apollo instance by NestJS. A more in depth documentation can be found [here](https://www.apollographql.com/docs/apollo-server/api/apollo-server/).
 
 **src/graphql.options.ts**
 ```typescript
@@ -96,7 +98,7 @@ import { GraphqlOptions } from './graphql.options';
 export class AppModule {}
 ```
 
-You may notice I removed `AppController` and `AppService` from the main module. We don't need them since we will be using GraphQL instead of REST. Appropriate files can be deleted too.
+You may have noticed I removed `AppController` and `AppService` from the main module. We don't need them since we will be using GraphQL instead of a REST api. The corresponding files can be deleted as well.
 
 To test this setup out, let's create a simple graphql API schema.
 
@@ -124,13 +126,21 @@ type Query {
 }
 ```
 
-Running `npm start` will generate `src/graphql.schema.generated.ts` with typescript types from the schema, that we can use in our source code, and launch the server on port 3000. We can now navigate to `http://localhost:3000/graphql` (default GraphQL API path) to see GraphQL Playground.
+Running `npm start` will do two things: 
+- Generate `src/graphql.schema.generated.ts` with typescript types which can be used in our source code.
+- Launch the server on port 3000. 
+
+We can now navigate to `http://localhost:3000/graphql` (default GraphQL API path) to see the GraphQL Playground.
 
 <img src="https://thepracticaldev.s3.amazonaws.com/i/gccnoc11iw8fv6gvnld2.png" alt="graphql playground" width="542"/>
 
 ### Prisma
 
-To run Prisma we need to install [Docker](https://www.docker.com/), follow the installation guide [here](https://docs.docker.com/install/). *Linux users - you need to install [docker-compose](https://docs.docker.com/compose/install/) separately*. We will be running two containers - one for actual database and second one for the prisma service.
+To run Prisma we need to install [Docker](https://www.docker.com/), you can follow the installation guide [here](https://docs.docker.com/install/). 
+
+> *Linux users - you need to install [docker-compose](https://docs.docker.com/compose/install/) separately*. 
+
+We will be running two containers - one for the actual database and a second one for the prisma service.
 
 Create a docker compose configuration file in the root project directory.
 
@@ -176,9 +186,9 @@ Run docker compose in the root directory of the project. Docker compose will dow
 $ docker-compose up -d
 ```
 
-Prisma server is now connected to the local Postgress instance and runs on port 4466. Opening `http://localhost:4466` in a browser will open Prisma GraphQL playground.
+The Prisma server is now connected to the local Postgress instance and runs on port 4466. Opening `http://localhost:4466` in a browser will open the Prisma GraphQL playground.
 
-Now let's install Prisma CLI and prisma client helper library. 
+Now let's install the Prisma CLI and the Prisma client helper library. 
 
 ```shell
 $ npm install -g prisma 
@@ -191,7 +201,7 @@ And initialise Prisma in our project root folder.
 $ prisma init --endpoint http://localhost:4466
 ```
 
-Prisma initialisation will create `datamodel.prisma` and `prisma.yml` files in the root of our project. `datamodel.prisma` contains database schema and `prisma.yml` prisma client configurations.
+Prisma initialisation will create the `datamodel.prisma` and `prisma.yml` files in the root of our project. The `datamodel.prisma` file contains the database schema and `prisma.yml` contains the prisma client configurations.
 
 Add the following code to `prisma.yml` to generate `typescript-client` so we can query our database.
 
@@ -204,19 +214,19 @@ generate:
     output: ./generated/prisma-client/
 ```
 
-Then run `prisma deploy` to deploy your service. It will initialise the schema specified in `datamodel.prisma` and generate prisma client.
+Then run `prisma deploy` to deploy your service. It will initialise the schema specified in `datamodel.prisma` and generate the prisma client.
 
 ```shell
 $ prisma deploy
 ```
 
-Go to `http://localhost:4466/_admin` to open prisma admin tool, a little more convenient way to view and edit your data comparing to graphql playground.
+Go to `http://localhost:4466/_admin` to open the prisma admin tool, a slightly more convenient way to view and edit your data compared to the graphql playground.
 
 ### Prisma Module
 
-This step is pretty much optional because you can use generated prisma client as it is in other modules/services etc. But making a prisma module will make it easier to configure or change something in the future.
+This step is pretty much optional as you can use the generated prisma client as it is in other modules/services etc. but making a prisma module will make it easier to configure or change something in the future.
 
-With NestJS CLI lets create prisma module and a service. CLI will automatically create files boilerplate and do initial module metadata setup for us.
+Let's use the NestJS CLI to create a prisma module and a service. The CLI will automatically create the files boilerplates and do the initial module metadata setup for us.
 
 ```shell
 $ nest g module prisma 
@@ -301,7 +311,7 @@ generate:
     output: ./generated/prisma-client/
 ```
 
-After deploying the schema prisma client will be automatically updated and you should see appropriate changes in prisma admin `http://localhost:4466/_admin`.
+After deploying the schema, the prisma client will be automatically updated and you should see appropriate changes in prisma admin `http://localhost:4466/_admin`.
 
 ```ssh
 $ prisma deploy
@@ -405,7 +415,7 @@ export class AuthService {
 }
 ```
 
-Validate method of the auth service will check if a user id from a JWT token is persistent in the database. 
+The validate method of the auth service will check if a user id from a JWT token is persisted in the database. 
 
 **src/auth/jwt.strategy.ts**
 
@@ -511,7 +521,7 @@ import { UserModule } from './user/user.module';
 export class AppModule {}
 ```
 
-To easily access request and user objects from graphql context we can create decorators.
+To easily access request and user objects from the graphql context we can create decorators.
 
 **src/shared/decorators/decorators.ts**
 
