@@ -27,11 +27,12 @@ After you have node and npm installed, let's install NestJS CLI and initialise a
 ```shell
 $ npm i -g @nestjs/cli
 $ nest new nestjs-boilerplate
+$ cd nestjs-boilerplate
 ```
 
 During the installation process you will be asked what package manager you want to use (yarn or npm). In this tutorial I'll be using npm, but if you prefer yarn, go for it.
 
-Now let's run `npm start`. It will start the application on port 3000, so opening `http://localhost:3000` in a browser will display a "Hello World!" message.
+Now let's run `npm start`. It will start the application on port 3000, so opening [http://localhost:3000](http://localhost:3000) in a browser will display a "Hello World!" message.
 
 ### GraphQL
 
@@ -130,7 +131,7 @@ Running `npm start` will do two things:
 - Generate `src/graphql.schema.generated.ts` with typescript types which can be used in our source code.
 - Launch the server on port 3000. 
 
-We can now navigate to `http://localhost:3000/graphql` (default GraphQL API path) to see the GraphQL Playground.
+We can now navigate to [http://localhost:3000/graphql](http://localhost:3000/graphql) (default GraphQL API path) to see the GraphQL Playground.
 
 <img src="https://thepracticaldev.s3.amazonaws.com/i/gccnoc11iw8fv6gvnld2.png" alt="graphql playground" width="542"/>
 
@@ -186,7 +187,7 @@ Run docker compose in the root directory of the project. Docker compose will dow
 $ docker-compose up -d
 ```
 
-The Prisma server is now connected to the local Postgress instance and runs on port 4466. Opening `http://localhost:4466` in a browser will open the Prisma GraphQL playground.
+The Prisma server is now connected to the local Postgress instance and runs on port 4466. Opening [http://localhost:4466](http://localhost:4466) in a browser will open the Prisma GraphQL playground.
 
 Now let's install the Prisma CLI and the Prisma client helper library. 
 
@@ -220,7 +221,7 @@ Then run `prisma deploy` to deploy your service. It will initialise the schema s
 $ prisma deploy
 ```
 
-Go to `http://localhost:4466/_admin` to open the prisma admin tool, a slightly more convenient way to view and edit your data compared to the graphql playground.
+Go to [http://localhost:4466/_admin](http://localhost:4466/_admin) to open the prisma admin tool, a slightly more convenient way to view and edit your data compared to the graphql playground.
 
 ### Prisma Module
 
@@ -269,14 +270,15 @@ Great! We are done with the initial setup, let's now continue implementing authe
 
 ### Database schema
 
-Let's store our boilerplate app schema in **database/datamodel.prisma**.
+Let's store our boilerplate app schema in **database/datamodel.prisma**. We can also delete the old datamodel file in the root of the project with default schema.
 
 ```shell
+$ rm datamodel.prisma
 $ mkdir database
 $ touch database/datamodel.prisma
 ```
 
-**database/user.prisma**
+**database/datamodel.prisma**
 
 ```graphql
 type User {
@@ -311,7 +313,7 @@ generate:
     output: ./generated/prisma-client/
 ```
 
-After deploying the schema, the prisma client will be automatically updated and you should see appropriate changes in prisma admin `http://localhost:4466/_admin`.
+After deploying the schema, the prisma client will be automatically updated and you should see appropriate changes in prisma admin [http://localhost:4466/_admin](http://localhost:4466/_admin).
 
 ```ssh
 $ prisma deploy
@@ -380,7 +382,7 @@ Now launch the app with `npm start` so it will generate typescript types from th
 First, we need to install some additional packages to implement passport JWT in our NestJS app.
 
 ```shell
-$ npm install --save @nestjs/passport passport @nestjs/jwt passport-jwt cookie-parser bcryptjs class-validator
+$ npm install --save @nestjs/passport passport @nestjs/jwt passport-jwt cookie-parser bcryptjs class-validator class-transformer
 $ npm install @types/passport-jwt --save-dev
 ```
 
@@ -474,6 +476,8 @@ Now let's create a validation class that we will use later and put some email/pa
 $ touch src/auth/sign-up-input.dto.ts
 ```
 
+**src/auth/sign-up-input.dto.ts**
+
 ```typescript
 import { IsEmail, MinLength } from 'class-validator';
 import { SignUpInput } from '../graphql.schema.generated';
@@ -498,8 +502,6 @@ import { GraphqlOptions } from './graphql.options';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_PIPE } from '@nestjs/core';
-import { PostModule } from './post/post.module';
-import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -508,8 +510,6 @@ import { UserModule } from './user/user.module';
     }),
     PrismaModule,
     AuthModule,
-    PostModule,
-    UserModule,
   ],
   providers: [
     {
@@ -521,7 +521,7 @@ import { UserModule } from './user/user.module';
 export class AppModule {}
 ```
 
-To easily access request and user objects from the graphql context we can create decorators.
+To easily access request and user objects from the graphql context we can create decorators. More info about custom decorators can be found [here](https://docs.nestjs.com/custom-decorators).
 
 **src/shared/decorators/decorators.ts**
 
@@ -787,19 +787,72 @@ And of course `UserModule`.
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
 import { UserResolver } from './user.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
-  providers: [UserService, UserResolver],
+  providers: [UserResolver],
   imports: [PrismaModule],
 })
 export class UserModule {}
 ```
 
+# Sample Queries
+
+To test your application you can run these simple queries.
+
+**Signing-up**
+
+```graphql
+mutation {
+  signup(signUpInput: { email: "user@email.com", password: "pasword" }) {
+    id
+    email
+  }
+}
+```
+
+**Logging-in**
+
+```graphql
+mutation {
+  login(loginInput: { email: "user@email.com", password: "pasword" }) {
+    id
+    email
+  }
+}
+```
+
+**Creating a post**
+
+```graphql
+mutation {
+  createPost(postInput: { title: "Post Title", body: "Post Body" }) {
+    id
+    title
+    author {
+      id
+      email
+    }
+  }
+}
+```
+
+**Retrieving all posts**
+
+```graphql
+query {
+  posts {
+    title
+    author {
+      email
+    }
+  }
+}
+```
+
 # Conclusion
 
-We are finally done with our app boilerplate! Check nestjs documentation to add more useful features to your application. When deploying to production environment don't forger to secure your Prisma layer and database.
+We are finally done with our app boilerplate! Check nestjs documentation to add more useful features to your application. When deploying to production environment don't forget to secure your Prisma layer and database.
 
 You can find the final code [here](https://github.com/nikitakot/nestjs-boilerplate).
