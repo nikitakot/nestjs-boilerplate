@@ -10,11 +10,11 @@ The boilerplate app created by this tutorial is [here](https://github.com/nikita
 
 # Intro
 
-[NestJS](https://nestjs.com/) is a relatively new framework in the Node world. Inspired by Angular and built on top of Express with full TypeScript support, it provides scalable and maintainable architecture to your applications. NestJS also supports [GraphQL](https://graphql.org/) - a robust query language for APIs with a dedicated, ready to use, `@nestjs/graphql` module (in fact, the module is just a wrapper around Apollo server).
+[NestJS](https://nestjs.com/) is a relatively new framework in the Node world. Inspired by Angular and built on top of Express with full TypeScript support, it provides a scalable and maintainable architecture to your applications. NestJS also supports [GraphQL](https://graphql.org/) - a robust query language for APIs with a dedicated, ready to use, `@nestjs/graphql` module (in fact, the module is just a wrapper around Apollo server).
 
-In this tutorial we're going to build a boilerplate with all the basic features you will need to develop more complex applications. We will use [Prisma](https://www.prisma.io/) as a database layer since it works extremely well with GraphQL APIs, allowing you to map Prisma resolver to GraphQl API resolvers easily.
+In this tutorial we're going to build a boilerplate with all the basic features you will need to develop more complex applications. We will use [Prisma](https://www.prisma.io/) as a database layer since it works extremely well with GraphQL APIs allowing you to map Prisma resolver to GraphQl API resolvers easily.
 
-By the end of this article we will create simple blog application, which will allow users to register, log-in and create posts.
+By the end of this article we will create a simple blog application, which will allow users to register, log-in and create posts.
 
 # Getting Started
 
@@ -187,7 +187,7 @@ Run docker compose in the root directory of the project. Docker compose will dow
 $ docker-compose up -d
 ```
 
-The Prisma server is now connected to the local Postgress instance and runs on port 4466. Opening [http://localhost:4466](http://localhost:4466) in a browser will open the Prisma GraphQL playground.
+The Prisma server is now connected to the local Postgres instance and runs on port 4466. Opening [http://localhost:4466](http://localhost:4466) in a browser will open the Prisma GraphQL playground.
 
 Now let's install the Prisma CLI and the Prisma client helper library. 
 
@@ -227,7 +227,7 @@ Go to [http://localhost:4466/_admin](http://localhost:4466/_admin) to open the p
 
 This step is pretty much optional as you can use the generated prisma client as it is in other modules/services etc. but making a prisma module will make it easier to configure or change something in the future.
 
-Let's use the NestJS CLI to create a prisma module and a service. The CLI will automatically create the files boilerplates and do the initial module metadata setup for us.
+Let's use the NestJS CLI to create a prisma module and a service. The CLI will automatically create the files boilerplate's files and do the initial module metadata setup for us.
 
 ```shell
 $ nest g module prisma 
