@@ -8,6 +8,11 @@ tags: #node, #javascript, #graphql, #webdev
 
 The boilerplate app created by this tutorial is [here](https://github.com/nikitakot/nestjs-boilerplate).
 
+# ⚠️⚠️⚠️ Update - 06 April 2020
+
+NestJS version 7 was recently [released](https://trilon.io/blog/announcing-nestjs-7-whats-new). Many thanks to 
+[johnbiundo](https://dev.to/johnbiundo) who [posted](https://dev.to/johnbiundo/comment/nck1) what changes have to be done for this version update. The github repository is also updated, you can check the changes I've made [here](https://github.com/nikitakot/nestjs-boilerplate/commit/7953e674d519d48f36ebf60f332e1289044807a7).
+
 # Intro
 
 [NestJS](https://nestjs.com/) is a relatively new framework in the Node world. Inspired by Angular and built on top of Express with full TypeScript support, it provides a scalable and maintainable architecture to your applications. NestJS also supports [GraphQL](https://graphql.org/) - a robust query language for APIs with a dedicated, ready to use, `@nestjs/graphql` module (in fact, the module is just a wrapper around Apollo server).
