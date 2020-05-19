@@ -4,7 +4,7 @@
 
 ## Description
 
-Boilerplate application from this [tutorial](https://dev.to/nikitakot/nestjs-boilerplate-with-prisma-5d25-temp-slug-3438209?preview=83828ea41d7dec833140528878644ec8ee72956162768602883552429fa21d55fcedef6f03ae5944861b370057d0cceee291957350c415530588ab34).
+Boilerplate application from this [tutorial](https://dev.to/nikitakot/building-nestjs-app-boilerplate-authentication-validation-graphql-and-prisma-f1d).
 
 ## Installation
 
