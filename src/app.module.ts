@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_PIPE } from '@nestjs/core';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserModule } from './user/user.module';
     PostModule,
     UserModule,
   ],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_PIPE,

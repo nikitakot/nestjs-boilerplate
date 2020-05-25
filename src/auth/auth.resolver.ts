@@ -48,7 +48,10 @@ export class AuthResolver {
     }
     const password = await bcryptjs.hash(signUpInputDto.password, 10);
 
-    const user = await this.prisma.client.createUser({ ...signUpInputDto, password });
+    const user = await this.prisma.client.createUser({
+      ...signUpInputDto,
+      password,
+    });
 
     const jwt = this.jwt.sign({ id: user.id });
     res.cookie('token', jwt, { httpOnly: true });

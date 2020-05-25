@@ -12,7 +12,8 @@ export class GraphqlOptions implements GqlOptionsFactory {
       resolverValidationOptions: {
         requireResolversForResolveType: false,
       },
-      definitions: { // will generate .ts types from gql schema files
+      definitions: {
+        // will generate .ts types from gql schema files
         path: join(process.cwd(), 'src/graphql.schema.generated.ts'),
         outputAs: 'class',
       },
